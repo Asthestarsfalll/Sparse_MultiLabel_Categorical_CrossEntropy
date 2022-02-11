@@ -4,7 +4,7 @@
 
 This repo contains Sparse Multilabel Categorical CrossEntropy(`SMCCE`) functions implemented by PyTorch and MegEngine.
 
-`SMCCE ` is the sparse version of Multilabel Categorical CrossEntropy(`MCCE`). When positive examples are much less than negative examples, it's able to significantly reduce the size of the label matrix and speed up the training without performance loss.
+`SMCCE`  is the sparse version of Multilabel Categorical CrossEntropy(`MCCE`). When positive examples are much less than negative examples, it's able to significantly reduce the size of the label matrix and speed up the training without performance loss.
 
 More detial information :  https://kexue.fm/archives/8888
 

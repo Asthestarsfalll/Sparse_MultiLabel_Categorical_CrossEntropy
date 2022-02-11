@@ -6,8 +6,8 @@ from torch import Tensor
 def batch_gather(input: Tensor, indices: Tensor):
     """
     Args:
-        input: label tensor with shape [batch_size, n, L]
-        indices: predict tensor with shape [batch_size, m, l]
+        input: label tensor with shape [batch_size, n, L] or [batch_size, L]
+        indices: predict tensor with shape [batch_size, m, l] or [batch_size, l]
 
     Return:
         Note that when second dimention n != m, there will be a reshape operation to gather all value along this dimention of input 
@@ -21,7 +21,7 @@ def batch_gather(input: Tensor, indices: Tensor):
     for data, indice in zip(input, indices):
         if len(indice) < len(data):
             indice = indice.reshape(-1)
-            results.append(data[:, indice])
+            results.append(data[..., indice])
         else:
             indice_dim = indice.ndim
             results.append(torch.gather(data, dim=indice_dim-1, index=indice))
@@ -33,9 +33,11 @@ def sparse_multilabel_categorical_crossentropy(label: Tensor, pred: Tensor, mask
         Reference: https://kexue.fm/archives/8888, https://github.com/bojone/bert4keras/blob/4dcda150b54ded71420c44d25ff282ed30f3ea42/bert4keras/backend.py#L272
 
     Args:
-        label: one-hot tensor with shape [batch_size, n, num_positive]
-        pred: logits tensor with shape [batch_size, m, num_classes], don't use sigmoid
-        mask_zero: if label is used zero padding to align, please specify make_zero=True
+        label: label tensor with shape [batch_size, n, num_positive] or [Batch_size, num_positive]
+            should contain the indexes of the positive rather than a ont-hot vector
+        pred: logits tensor with shape [batch_size, m, num_classes] or [batch_size, num_classes], don't use acivation.
+        mask_zero: if label is used zero padding to align, please specify make_zero=True.
+            when mask_zero = True, make sure the label start with 1 to num_classes, before zero padding.
 
     """
     zeros = torch.zeros_like(pred[..., :1])
