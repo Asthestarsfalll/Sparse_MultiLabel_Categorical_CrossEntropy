@@ -15,7 +15,7 @@ Please note that this implementation does not need change the num_classes to num
 ```python
 from SMCCE_pytorch import sparse_multilabel_categorical_crossentropy as smcce
 
-def loss(label, pred):
+def loss_fn(label, pred):
     # if need, process the label and pred to demanded format
     # ...
     return smcce(label, pred)
@@ -26,5 +26,5 @@ def loss(label, pred):
 # ...
 
 
-loss = loss(label, pred)
+loss = loss_fn(label, pred)
 ```
