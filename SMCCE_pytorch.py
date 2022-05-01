@@ -18,13 +18,13 @@ def batch_gather(input: Tensor, indices: Tensor):
     if indices.dtype != torch.int64:
         indices = torch.tensor(indices, dtype=torch.int64)
     results = []
-    for data, indice in zip(input, indices):
-        if len(indice) < len(data):
-            indice = indice.reshape(-1)
-            results.append(data[..., indice])
+    for data, index in zip(input, indices):
+        if len(index) < len(data):
+            index = index.reshape(-1)
+            results.append(data[..., index])
         else:
-            indice_dim = indice.ndim
-            results.append(torch.gather(data, dim=indice_dim-1, index=indice))
+            indice_dim = index.ndim
+            results.append(torch.gather(data, dim=indice_dim-1, index=index))
     return torch.stack(results)
 
 
@@ -34,7 +34,7 @@ def sparse_multilabel_categorical_crossentropy(label: Tensor, pred: Tensor, mask
 
     Args:
         label: label tensor with shape [batch_size, n, num_positive] or [Batch_size, num_positive]
-            should contain the indexes of the positive rather than a ont-hot vector
+            should contain the indexes of the positive rather than a ont-hot vector.
         pred: logits tensor with shape [batch_size, m, num_classes] or [batch_size, num_classes], don't use acivation.
         mask_zero: if label is used zero padding to align, please specify make_zero=True.
             when mask_zero = True, make sure the label start with 1 to num_classes, before zero padding.
@@ -43,8 +43,8 @@ def sparse_multilabel_categorical_crossentropy(label: Tensor, pred: Tensor, mask
     zeros = torch.zeros_like(pred[..., :1])
     pred = torch.cat([pred, zeros], dim=-1)
     if mask_zero:
-        infs = torch.ones_like(zeros) * float('inf')
-        pred = torch.cat([infs, pred[..., 1:]], dim=-1)
+        infs = torch.ones_like(zeros) * np.nan
+        pred = torch.cat([infs, pred], dim=-1)
     pos_2 = batch_gather(pred, label)
     pos_1 = torch.cat([pos_2, zeros], dim=-1)
     if mask_zero:
@@ -64,7 +64,7 @@ def sparse_multilabel_categorical_crossentropy(label: Tensor, pred: Tensor, mask
     elif reduction == 'none':
         return loss
     else:
-        raise Exception('Unexpected reduction {}'.format(self.reduction))
+        raise Exception('Unexpected reduction {}'.format(reduction))
 
 
 if __name__ == '__main__':
