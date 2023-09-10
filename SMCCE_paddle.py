@@ -32,6 +32,7 @@ def batch_gather(input: Tensor, indices: Tensor):
 def sparse_multilabel_categorical_crossentropy(label: Tensor, pred: Tensor, mask_zero=False, reduction='none'):
     """Sparse Multilabel Categorical CrossEntropy
         Reference: https://kexue.fm/archives/8888, https://github.com/bojone/bert4keras/blob/4dcda150b54ded71420c44d25ff282ed30f3ea42/bert4keras/backend.py#L272
+        You should remove `[CLS]` token before call this function. 
 
     Args:
         label: label tensor with shape [batch_size, n, num_positive] or [Batch_size, num_positive]
@@ -44,7 +45,7 @@ def sparse_multilabel_categorical_crossentropy(label: Tensor, pred: Tensor, mask
     zeros = paddle.zeros_like(pred[..., :1])
     pred = paddle.concat([pred, zeros], axis=-1)
     if mask_zero:
-        infs = paddle.ones_like(zeros) * np.nan
+        infs = paddle.ones_like(zeros) * np.inf
         pred = paddle.concat([infs, pred], axis=-1)
     pos_2 = batch_gather(pred, label)
     pos_1 = paddle.concat([pos_2, zeros], axis=-1)

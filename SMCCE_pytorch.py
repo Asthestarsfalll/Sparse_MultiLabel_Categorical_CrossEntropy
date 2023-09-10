@@ -16,8 +16,9 @@ def batch_gather(input: Tensor, indices: Tensor):
 
     """
     if indices.dtype != torch.int64:
-        indices = torch.tensor(indices, dtype=torch.int64)
+        indices = indices.type(torch.int64)
     results = []
+    # breakpoint()
     for data, index in zip(input, indices):
         if len(index) < len(data):
             index = index.reshape(-1)
@@ -28,14 +29,15 @@ def batch_gather(input: Tensor, indices: Tensor):
     return torch.stack(results)
 
 
-def sparse_multilabel_categorical_crossentropy(label: Tensor, pred: Tensor, mask_zero=False, reduction='none'):
+def sparse_multilabel_categorical_crossentropy(pred: Tensor, label: Tensor, mask_zero=False, reduction='none'):
     """Sparse Multilabel Categorical CrossEntropy
         Reference: https://kexue.fm/archives/8888, https://github.com/bojone/bert4keras/blob/4dcda150b54ded71420c44d25ff282ed30f3ea42/bert4keras/backend.py#L272
+        You should remove `[CLS]` token before call this function. 
 
     Args:
+        pred: logits tensor with shape [batch_size, m, num_classes] or [batch_size, num_classes], don't use acivation.
         label: label tensor with shape [batch_size, n, num_positive] or [Batch_size, num_positive]
             should contain the indexes of the positive rather than a ont-hot vector.
-        pred: logits tensor with shape [batch_size, m, num_classes] or [batch_size, num_classes], don't use acivation.
         mask_zero: if label is used zero padding to align, please specify make_zero=True.
             when mask_zero = True, make sure the label start with 1 to num_classes, before zero padding.
 
@@ -43,7 +45,7 @@ def sparse_multilabel_categorical_crossentropy(label: Tensor, pred: Tensor, mask
     zeros = torch.zeros_like(pred[..., :1])
     pred = torch.cat([pred, zeros], dim=-1)
     if mask_zero:
-        infs = torch.ones_like(zeros) * np.nan
+        infs = torch.ones_like(zeros) * np.inf
         pred = torch.cat([infs, pred], dim=-1)
     pos_2 = batch_gather(pred, label)
     pos_1 = torch.cat([pos_2, zeros], dim=-1)

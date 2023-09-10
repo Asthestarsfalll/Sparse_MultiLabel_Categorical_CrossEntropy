@@ -10,6 +10,8 @@ More detail information :  https://kexue.fm/archives/8888, https://juejin.cn/pos
 
 Please note that this implementation does not need change the num_classes to num_classes + 1, however original implementation needs.
 
+You should remove `[CLS]` token before call this function. 
+
 ## Usage
 
 ```python
